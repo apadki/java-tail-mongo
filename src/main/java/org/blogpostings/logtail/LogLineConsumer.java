@@ -1,20 +1,23 @@
-package org.tests.jtail;
+package org.blogpostings.logtail;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
+import org.blogpostings.logprocess.ProcessLogLine;
 
 public class LogLineConsumer implements Runnable {
 
 	BlockingQueue<String> linequeue = null;
 	CountDownLatch latch;
+	ProcessLogLine processLogLine;
 	private static final Logger log = Logger.getLogger(LogLineConsumer.class
 			.getName());
 
-	public LogLineConsumer(BlockingQueue<String> linequeue, CountDownLatch latch) {
+	
+	public LogLineConsumer(BlockingQueue<String> linequeue, ProcessLogLine processLogLine,CountDownLatch latch) {
 		this.linequeue = linequeue;
-
+		this.processLogLine = processLogLine;
 		this.latch = latch;
 	}
 
@@ -25,7 +28,8 @@ public class LogLineConsumer implements Runnable {
 			while (true) {
 
 				String logLine = linequeue.take();
-				log.info(logLine);
+					//log.info(logLine);
+				processLogLine.processLine(logLine);
 
 			}
 		} catch (InterruptedException e) {

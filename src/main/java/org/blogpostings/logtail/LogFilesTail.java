@@ -1,10 +1,7 @@
-package org.tests.jtail;
+package org.blogpostings.logtail;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -16,42 +13,25 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-public class LogFilesMonitor{
+public class LogFilesTail{
    
    ApplicationContext context = null;
 
    public static ConcurrentHashMap<String, Long> activeFiles = new ConcurrentHashMap<String, Long>();
 
-   private static final Logger log = Logger.getLogger(LogFilesMonitor.class
+   private static final Logger log = Logger.getLogger(LogFilesTail.class
            .getName());
 
-   public static void main(String[] args) throws Exception {
-       // The monitor will perform polling on the folder every 5 sec3onds
-
-       LogFilesMonitor sm = new LogFilesMonitor();
-        String appContextFileName = args[0];
-       sm.start(appContextFileName);
-
-   }
-
-  
-
-  
-
-   public void start(String appContextFileName) {
+     public void start(String appContextFileName) {
 
        long start = System.currentTimeMillis();
-
-       log.info(" ** START TIME " + start);
 
        ApplicationContext  context = new ClassPathXmlApplicationContext(appContextFileName); 
 
        CountDownLatch latch = new CountDownLatch(3);
 
-       LogMonitorConfig logMonitorConfig = (LogMonitorConfig) context
-               .getBean("logMonitorConfig");
-
-     
+       LogTailConfig logMonitorConfig = (LogTailConfig) context
+               .getBean("logMonitorConfig");   
      
        File folder = new File(logMonitorConfig.getLogDir());
        if (!folder.exists()) {
@@ -62,15 +42,12 @@ public class LogFilesMonitor{
                    + logMonitorConfig.getLogDir());
        }
 
-       log.debug("logdir :" + logMonitorConfig.getLogDir());
-    
-       
+       log.debug("logdir :" + logMonitorConfig.getLogDir());   
 
        final BlockingQueue<String> fileNameQ = new LinkedBlockingQueue<String>(
                1024);
        final BlockingQueue<String> logLineQ = new LinkedBlockingQueue<String>(
                1024);
-
        
        FileNameConsumer fileNameConsumer = new FileNameConsumer(fileNameQ,
                logLineQ, activeFiles, latch);
@@ -78,7 +55,7 @@ public class LogFilesMonitor{
        new Thread(fileNameConsumer, "File Name Consumer").start();
 
        LogLineConsumer logLineConsumer = new LogLineConsumer(logLineQ,
-               latch);
+               logMonitorConfig.getProcessLogLine(), latch);
 
        new Thread(logLineConsumer, "Log Line Consumer").start();
 
@@ -87,11 +64,7 @@ public class LogFilesMonitor{
        String fileNamePattern = getFileNamePattern(pattern);
 
        File[] files = folder.listFiles();
-
-       // SimpleDateFormat dtft = new SimpleDateFormat("yyyyMMdd'1700'");
-       // Date dtNow = new Date();
-       // String dtftStr = dtft.format(dtNow);
-       log.info("FILE PATTERN TO MATCH " + fileNamePattern);
+      log.info("FILE PATTERN TO MATCH " + fileNamePattern);
        for (File file : files) {
            try {
 
@@ -114,10 +87,7 @@ public class LogFilesMonitor{
        }
 
        log.info(" Putting EOF on fileNameq ");
-      // fileNameQ.add("EOF");
-
-
-        FileAlterationObserver observer = new FileAlterationObserver(folder);
+           FileAlterationObserver observer = new FileAlterationObserver(folder);
          FileAlterationMonitor monitor = new FileAlterationMonitor(
         logMonitorConfig.getPollingInterval());
        
@@ -128,8 +98,6 @@ public class LogFilesMonitor{
         
         catch (Exception e) { // TODO Auto-generated catch  block 
     	   e.printStackTrace(); }
-       
-
    
        try {
            latch.await();
@@ -146,26 +114,20 @@ public class LogFilesMonitor{
        log.info(" ** TOTAL TIME TAKEN in Seconds " + (end - start) / 1000);
 
        
-       // System.out.println("FileAlterationMonitor Running");
-   }
+    }
 
    private String getFileNamePattern(String pattern) {
 
        StringBuffer fileNamePattern = new StringBuffer();
-       // StringBuffer fileNamePattern = new StringBuffer();
        fileNamePattern.append(pattern);
        return fileNamePattern.toString();
 
    }
 
    private boolean matchedFileName(String fileName, String fileNamePattern) {
-	  // return true;
-	   System.out.println("MATCH : " + fileName.matches(fileNamePattern) +":" +fileName + "  " + fileNamePattern);
        return fileName.matches(fileNamePattern);
 
    }
   
    
 }
-
-

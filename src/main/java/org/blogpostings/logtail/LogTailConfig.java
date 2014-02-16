@@ -1,8 +1,19 @@
-package org.tests.jtail;
+package org.blogpostings.logtail;
 
-public class LogMonitorConfig {
+import org.blogpostings.logprocess.ProcessLogLine;
+
+public class LogTailConfig {
 	private String logDir;
 	private Long pollingInterval;
+	private ProcessLogLine processLogLine;
+	
+	public ProcessLogLine getProcessLogLine() {
+		return processLogLine;
+	}
+
+	public void setProcessLogLine(ProcessLogLine processLogLine) {
+		this.processLogLine = processLogLine;
+	}
 
 	public Long getPollingInterval() {
 		return pollingInterval;
