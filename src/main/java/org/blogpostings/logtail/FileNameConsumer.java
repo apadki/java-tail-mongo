@@ -10,10 +10,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
-
-
-
-
 public class FileNameConsumer  implements Runnable{
 
 BlockingQueue<String> lineQueue = null;

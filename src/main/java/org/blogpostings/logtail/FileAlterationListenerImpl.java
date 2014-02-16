@@ -13,10 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/**
- * @author rm87341
- *
- */
+
 public class FileAlterationListenerImpl implements FileAlterationListener { //FileAlterationListenerAdaptor //FileAlterationListener
     private static final Log LOG = LogFactory.getLog(FileAlterationListenerImpl.class);
    
